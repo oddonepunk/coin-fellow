@@ -35,23 +35,24 @@ class AuthService implements AuthServiceInterface
     }
 
     public function login(LoginDTO $dto): array
-    {
-        $user = User::where('email', $dto->login)
-            ->orWhere('phone', $dto->login)
-            ->first();
+{
+    $user = User::where('email', $dto->login)
+        ->orWhere('phone', $dto->login)
+        ->orWhere('username', $dto->login)  //для фронтенда
+        ->first();
 
-        if (!$user || !Hash::check($dto->password, $user->password)) {
-            throw ValidationException::withMessages([
-                'login' => ['Неверные учетные данные'],
-            ]);
-        }
-
-        $user->update(['last_login_at' => now()]);
-
-        $tokens = $this->jwtService->generateTokens($user);
-
-        return array_merge($tokens, ['user' => $user]);
+    if (!$user || !Hash::check($dto->password, $user->password)) {
+        throw ValidationException::withMessages([
+            'login' => ['Неверные учетные данные'],
+        ]);
     }
+
+    $user->update(['last_login_at' => now()]);
+
+    $tokens = $this->jwtService->generateTokens($user);
+
+    return array_merge($tokens, ['user' => $user]);
+}
 
     public function telegramAuth(TelegramAuthDTO $dto): array
     {
