@@ -11,18 +11,10 @@ class AuthResource extends JsonResource
     {
         return [
             'access_token' => $this['access_token'],
-            'refresh_token' => $this['refresh_token'],
-            'token_type' => $this['token_type'],
-            'expires_in' => $this['expires_in'],
-            'user' => $this['user'] ?? null,
-        ];
-    }
-
-    public function with(Request $request): array
-    {
-        return [
-            'success' => true,
-            'message' => 'Authentication successful',
+            'refresh_token' => $this['refresh_token'] ?? null,
+            'token_type' => 'bearer',
+            'expires_in' => $this['expires_in'] ?? 3600,
+            'user' => new UserResource($this['user']),
         ];
     }
 }
