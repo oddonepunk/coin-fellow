@@ -5,6 +5,7 @@ namespace App\Services\Groups;
 use App\Models\Group;
 use App\Models\User;
 use App\Models\Invitation;
+use App\Models\GroupUser; 
 use App\Services\Notifications\Interfaces\NotificationServiceInterface;
 use App\Services\Groups\DTO\CreateGroupDTO;
 use App\Services\Groups\DTO\UpdateGroupDTO;
