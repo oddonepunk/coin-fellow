@@ -6,6 +6,7 @@ use App\Models\Group;
 use App\Models\User;
 use App\Models\Invitation;
 use App\Models\GroupUser; 
+use App\Models\GroupRole; 
 use App\Services\Notifications\Interfaces\NotificationServiceInterface;
 use App\Services\Groups\DTO\CreateGroupDTO;
 use App\Services\Groups\DTO\UpdateGroupDTO;
@@ -119,9 +120,12 @@ class GroupService implements GroupServiceInterface
             ]);
         }
 
+        $role = GroupRole::where('name', $dto->role ?? 'member')->first();
+
         GroupUser::create([
             'group_id' => $group->id,
             'user_id' => $invitedUser->id,
+            'role_id' => $role->id,
             'role' => $dto->role ?? 'member',
         ]);
 
@@ -164,18 +168,30 @@ class GroupService implements GroupServiceInterface
     }
 
    private function checkUserPermissions(User $user, Group $group, array $allowedRoles): void
-{
-    $groupUser = GroupUser::where('group_id', $group->id) 
-        ->where('user_id', $user->id)
-        ->first();
+   {
+        $groupUser = GroupUser::where('group_id', $group->id) 
+            ->where('user_id', $user->id)
+            ->with('roleModel')
+            ->first();
 
-   
-    if (!$groupUser || !in_array($groupUser->role, $allowedRoles)) {
+        if (!$groupUser) {
+            throw ValidationException::withMessages([
+                'permission' => ['У вас нет разрешения на выполнение этого действия'],
+            ]);
+        }
+
+        if ($groupUser->roleModel && in_array($groupUser->roleModel->name, $sllowedRoles)) {
+            return;
+        }
+
+        if (in_array($groupUser->role, $allowedRoles)) {
+            return;
+        }
+
         throw ValidationException::withMessages([
             'permission' => ['У вас нет разрешения на выполнение этого действия'],
         ]);
     }
-}
 
     private function notifyInvitation(User $invitedUser, User $inviter, Group $group): void
     {
