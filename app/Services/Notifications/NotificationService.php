@@ -142,17 +142,23 @@ class NotificationService implements NotificationServiceInterface
     }
 
     public function notifyInvitation(User $user, array $invitationData): void
-    {
-        $dto = new CreateNotificationDTO(
-            userId: $invitationData['invitee_id'],
-            type: Notification::TYPE_INVITATION,
-            message: "Приглашение в группу: {$invitationData['group_name']}",
-            groupId: $invitationData['group_id'],
-            data: $invitationData
-        );
-
-        dispatch(fn () => $this->createNotification($dto));
+{
+    $inviteeId = $invitationData['invitee_id'] ?? $invitationData['invited_user_id'] ?? null;
+    
+    if (!$inviteeId) {
+        return;
     }
+
+    $dto = new CreateNotificationDTO(
+        userId: $inviteeId,
+        type: Notification::TYPE_INVITATION,
+        message: "Приглашение в группу: {$invitationData['group_name']}",
+        groupId: $invitationData['group_id'],
+        data: $invitationData
+    );
+
+    dispatch(fn () => $this->createNotification($dto));
+}
 
 
 
