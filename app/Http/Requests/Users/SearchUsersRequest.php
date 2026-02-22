@@ -15,7 +15,6 @@ class SearchUsersRequest extends BaseRequest
     {
         return [
             'query' => 'required|string|min:2|max:255',
-            'group_id' => 'nullable|string|exists:groups,id',
             'limit' => 'nullable|integer|min:1|max:50'
         ];
     }

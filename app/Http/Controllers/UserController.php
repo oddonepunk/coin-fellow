@@ -18,7 +18,6 @@ class UserController extends Controller
     {
         $dto = SearchUsersDTO::from([
             'query' => $request->query('query'),
-            'excludeGroupId' => $request->query('group_id'),
             'limit' => $request->query('limit', 10)
         ]);
 
@@ -33,7 +32,7 @@ class UserController extends Controller
                 'per_page' => $users->perPage(),
                 'total' => $users->total()
             ],
-            'message' => 'Users retrieved successfully'
+            'message' => 'Пользователи успешно извлечены'
         ]);
     }
 
@@ -44,7 +43,7 @@ class UserController extends Controller
         return response()->json([
             'success' => true,
             'data' => new UserSearchResource($user),
-            'message' => 'User retrieved successfully'
+            'message' => 'Пользователь успешно получен'
         ]);
     }
 
@@ -58,7 +57,7 @@ class UserController extends Controller
         return response()->json([
             'success' => true,
             'data' => $users,
-            'message' => 'Users for invite retrieved successfully'
+            'message' => 'Пользователи, получившие приглашение, успешно получены'
         ]);
     }
 }

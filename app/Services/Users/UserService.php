@@ -15,7 +15,7 @@ class UserService implements UserServiceInterface
     {
         $query = User::query();
 
-        //Поиск по нескольким полям
+        // Поиск по нескольким полям
         $searchTerm = '%' . $dto->query . '%';
         $query->where(function ($q) use ($searchTerm) {
             $q->where('first_name', 'like', $searchTerm)
@@ -25,15 +25,8 @@ class UserService implements UserServiceInterface
               ->orWhere('phone', 'like', $searchTerm);
         });
 
-        //Исключаем текущего пользователя
+        // Исключаем текущего пользователя
         $query->where('id', '!=', auth()->id());
-
-        //Исключаем пользователей уже в группе
-        if ($dto->excludeGroupId) {
-            $query->whereDoesntHave('groups', function ($q) use ($dto) {
-                $q->where('group_id', $dto->excludeGroupId);
-            });
-        }
 
         return $query->paginate($dto->limit);
     }
