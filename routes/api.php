@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\BalanceController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PaymentController;
@@ -49,6 +50,13 @@ Route::middleware('jwt.auth')->prefix('groups/{groupId}')->group(function () {
     Route::get('expenses/{expenseId}', [ExpenseController::class, 'show']);
     Route::put('expenses/{expenseId}', [ExpenseController::class, 'update']);
     Route::delete('expenses/{expenseId}', [ExpenseController::class, 'destroy']);
+});
+
+//user routes
+Route::middleware('jwt.auth')->prefix('users')->group(function () {
+    Route::get('search', [UserController::class, 'search']);
+    Route::get('{id}', [UserController::class, 'show']);
+    Route::get('groups/{groupId}/invite', [UserController::class, 'forInvite']);
 });
 
 //user expenses (из всех групп)
