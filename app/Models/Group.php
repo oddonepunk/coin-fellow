@@ -23,15 +23,6 @@ class Group extends Model
         return $this->members();
     }
 
-    public function members(): BelongsToMany 
-    {
-        return $this->belongsToMany(User::class, 'group_user')
-            ->using(GroupUser::class)
-            ->withPivot('role', 'created_at', 'updated_at')
-            ->withTimestamps();
-    }
-
-
     public function expenses(): HasMany {
         return $this->hasMany(Expense::class);
     }
@@ -40,19 +31,42 @@ class Group extends Model
         return $this->hasMany(GroupUser::class);
     }
 
+    public function members(): BelongsToMany 
+    {
+        return $this->belongsToMany(User::class, 'group_user')
+            ->using(GroupUser::class)
+            ->withPivot(['role_id', 'role', 'created_at', 'updated_at'])
+            ->withTimestamps();
+    }
+
+
     public function getOwner(): ?GroupUser 
     {
         return $this->groupUsers()->where('role', 'owner')->first();
     }
 
-    public function getAdmins() 
+    public function getAdmins()
     {
-        return $this->groupUsers()->whereIn('role', ['owner', 'admin'])->get();
+        return $this->groupUsers()
+            ->where(function ($query) {
+                $query->whereIn('role', ['owner', 'admin'])
+                      ->orWhereHas('roleModel', fn($q) => $q->whereIn('name', ['owner', 'admin']));
+            })
+            ->with('user')
+            ->get();
     }
 
-    public function getMembers(){
-        return $this->groupUsers()->where('role', 'member')->get();
-    } 
+
+  public function getMembers()
+    {
+        return $this->groupUsers()
+            ->where(function ($query) {
+                $query->where('role', 'member')
+                      ->orWhereHas('roleModel', fn($q) => $q->where('name', 'member'));
+            })
+            ->with('user')
+            ->get();
+    }
 
     public function scopeWhereUserIsMember($query, User $user)
     {
@@ -70,28 +84,56 @@ class Group extends Model
 
    
 
-    public function isUserOwner(User $user): bool
-    {
-        return $this->users()
-            ->where('user_id', $user->id)
-            ->wherePivot('role', 'owner')
-            ->exists();
-    }
-
+ 
+    
     public function isUserAdmin(User $user): bool
     {
         return $this->groupUsers()
             ->where('user_id', $user->id)
-            ->whereIn('role', ['owner', 'admin'])
+            ->where(function ($query) {
+                $query->whereIn('role', ['owner', 'admin'])
+                      ->orWhereHas('roleModel', fn($q) => $q->whereIn('name', ['owner', 'admin']));
+            })
             ->exists();
     }
 
-    public function getUserRole(User $user): ?string
+    public function getUserRole(User $user): ?GroupRole
     {
         return $this->users()
             ->where('user_id', $user->id)
+            ->with('roleModel')
+            ->first();
+
+        return $groupUser?->roleModel;
+    }
+
+    public function getUserRoleName(User $user): ?string {
+        return $this->groupUsers()
+            ->where('user_id', $user->id)
             ->first()
-            ?->role;
+            ?->roleModel?->name;
+    }
+
+    public function userHasPermission(User $user, string $permission): bool
+    {
+        $groupUser = $this->groupUsers()
+            ->where('user_id', $user->id)
+            ->with('roleModel')
+            ->first();
+            
+        return $groupUser?->hasPermission($permission) ?? false;
+    }
+
+    
+    public function isUserOwner(User $user): bool
+    {
+        return $this->groupUsers()
+            ->where('user_id', $user->id)
+            ->where(function ($query) {
+                $query->where('role', 'owner')
+                      ->orWhereHas('roleModel', fn($q) => $q->where('name', 'owner'));
+            })
+            ->exists();
     }
 
     public function getMembersCount(): int
