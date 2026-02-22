@@ -70,6 +70,70 @@ class User extends Authenticatable implements JWTSubject
         return $this->getKey();
     }
 
+
+    private function getFullName(): string
+    {
+        if ($this->first_name && $this->last_name) {
+            return $this->first_name . ' ' . $this->last_name;
+        }
+        if ($this->first_name) {
+            return $this->first_name;
+        }
+        if ($this->username) {
+            return $this->username;
+        }
+        return $this->email;
+    }
+
+
+    public function getFullNameAttribute(): string
+{
+    if ($this->first_name && $this->last_name) {
+        return $this->first_name . ' ' . $this->last_name;
+    }
+    if ($this->first_name) {
+        return $this->first_name;
+    }
+    if ($this->username) {
+        return $this->username;
+    }
+    return $this->email;
+}
+
+public function getInitialsAttribute(): string
+{
+    if ($this->first_name && $this->last_name) {
+        return strtoupper(substr($this->first_name, 0, 1) . substr($this->last_name, 0, 1));
+    }
+    if ($this->first_name) {
+        return strtoupper(substr($this->first_name, 0, 2));
+    }
+    if ($this->username) {
+        return strtoupper(substr($this->username, 0, 2));
+    }
+    if ($this->email) {
+        return strtoupper(substr($this->email, 0, 2));
+    }
+    return 'U';
+}
+
+    private function getInitials(): string
+    {
+        if ($this->first_name && $this->last_name) {
+            return strtoupper(substr($this->first_name, 0, 1) . substr($this->last_name, 0, 1));
+        }
+        if ($this->first_name) {
+            return strtoupper(substr($this->first_name, 0, 2));
+        }
+        if ($this->username) {
+            return strtoupper(substr($this->username, 0, 2));
+        }
+        if ($this->email) {
+            return strtoupper(substr($this->email, 0, 2));
+        }
+        return 'U';
+    }
+
     public function hasActiveSubscription(): bool
     {
         if ($this->relationLoaded('subscription') && $this->subscription) {
