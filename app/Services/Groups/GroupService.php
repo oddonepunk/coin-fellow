@@ -180,7 +180,7 @@ class GroupService implements GroupServiceInterface
             ]);
         }
 
-        if ($groupUser->roleModel && in_array($groupUser->roleModel->name, $sllowedRoles)) {
+        if ($groupUser->roleModel && in_array($groupUser->roleModel->name, $allowedRoles)) {
             return;
         }
 
