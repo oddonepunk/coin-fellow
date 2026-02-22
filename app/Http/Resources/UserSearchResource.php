@@ -17,8 +17,8 @@ class UserSearchResource extends JsonResource
             'email' => $this->email,
             'phone' => $this->phone,
             'avatar_url' => $this->avatar_url,
-            'full_name' => $this->getFullNameAttribute() ?? $this->getDisplayName(),
-            'initials' => $this->getInitialsAttribute(),
+            'full_name' => $this->full_name,
+            'initials' => $this->initials,
             'display_name' => $this->getDisplayName()
         ];
     }
