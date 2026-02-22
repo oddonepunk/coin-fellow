@@ -10,6 +10,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\BudgetController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AnalyticsController;
+use App\Models\GroupRole;
 
 
 Route::prefix('auth')->group(function () {
@@ -35,6 +36,10 @@ Route::middleware('jwt.auth')->prefix('groups')->group(function () {
     Route::post('{groupId}/invite', [GroupController::class, 'invite']);
     Route::delete('{groupId}/members/{userId}', [GroupController::class, 'removeUser']);
     Route::post('{groupId}/leave', [GroupController::class, 'leave']);
+});
+
+Route::middleware('jwt.auth')->get('group-roles', function () {
+    return GroupRole::all(['id', 'name', 'display_name', 'description']);
 });
 
 //expenses routes
