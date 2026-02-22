@@ -12,7 +12,8 @@ class GroupUser extends Pivot
     protected $fillable = [
         'group_id',
         'user_id',
-        'role',
+        'role_id',
+        'role'
     ];
 
     protected $casts = [
@@ -29,28 +30,25 @@ class GroupUser extends Pivot
         return $this->belongsTo(User::class);
     }
 
-    public function scopeOwner($query) 
+    //связь со сущность group_role
+    public function roleModel(): BelongsTo 
     {
-        return $query->where('role', 'owner');
+        return $this->belongsTo(GroupRole::class, 'role_id');
     }
 
-    public function scopeAdmin($query) 
-    {
-        return $query->where('role', 'admin');
-    }
-
-    public function scopeMember($query) 
-    {
-        return $query->where('role', 'member');
-    }
-
+   
     public function isOwner(): bool 
     {
-        return $this->role === 'owner';
+        return $this->roleModel?->name === 'owner' || $this->role === 'owner';
     }
 
     public function isAdmin(): bool 
     {
-        return $this->role === 'admin';
+        return $this->roleModel?->name === 'admin' || $this->role === 'admin';
+    }
+
+    public function hasPermission(string $permission): bool 
+    {
+        return $this->roleModel?->hasPermission($permission) ?? false;
     }
 }
