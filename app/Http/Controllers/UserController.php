@@ -47,6 +47,24 @@ class UserController extends Controller
         ]);
     }
 
+    public function searchGroupMembers(Request $request, string $groupId): JsonResponse
+    {
+        $request->validate([
+            'query' => 'required|string|min:1'
+        ]);
+
+        $users = $this->userService->searchGroupMembers(
+            $groupId,
+            $request->query('query')
+        );
+
+        return response()->json([
+            'success' => true,
+            'data' => $users,
+            'message' => 'Участники группы успешно найдены'
+        ]);
+    }
+
     public function forInvite(SearchUsersRequest $request, string $groupId): JsonResponse
     {
         $users = $this->userService->getUsersForInvite(
