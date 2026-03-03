@@ -11,7 +11,8 @@ use App\Services\Payments\PaymentService;
 use App\Services\Notifications\NotificationService;
 use App\Services\Budgets\BudgetService;
 use App\Services\Analytics\AnalyticsService;
-use App\Services\Balances\BalanceService as BalanceServiceImplementation; 
+use App\Services\Balances\BalanceService as BalanceServiceImplementation;
+use App\Services\Users\UserService;  
 use App\Services\Auth\Interfaces\AuthServiceInterface;
 use App\Services\Groups\Interfaces\GroupServiceInterface;
 use App\Services\Expenses\Interfaces\ExpenseServiceInterface;
@@ -22,6 +23,7 @@ use App\Services\Payments\Interfaces\PaymentServiceInterface;
 use App\Services\Notifications\Interfaces\NotificationServiceInterface;
 use App\Services\Budgets\Interfaces\BudgetServiceInterface;
 use App\Services\Analytics\Interfaces\AnalyticsServiceInterface;
+use App\Services\Users\Interfaces\UserServiceInterface;
 use App\Services\JWT\JWTService;
 use Illuminate\Support\ServiceProvider;
 
@@ -39,6 +41,7 @@ class AuthServiceProvider extends ServiceProvider
         $this->app->bind(NotificationServiceInterface::class, NotificationService::class);  
         $this->app->bind(BudgetServiceInterface::class, BudgetService::class);
         $this->app->bind(AnalyticsServiceInterface::class, AnalyticsService::class);
+        $this->app->bind(UserServiceInterface::class, UserService::class);
         $this->app->bind(JWTService::class, function () {
             return new JWTService();
         });
