@@ -11,4 +11,5 @@ interface UserServiceInterface
     public function searchUsers(SearchUsersDTO $dto): LengthAwarePaginator;
     public function getUserById(string $userId): User;
     public function getUsersForInvite(string $groupId, string $query): array;
+    public function searchGroupMembers(string $groupId, string $query): array;
 }

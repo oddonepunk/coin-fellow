@@ -62,6 +62,43 @@ class UserService implements UserServiceInterface
         })->toArray();
     }
 
+
+    public function searchGroupMembers(string $groupId, string $query): array
+    {
+        $group = Group::findOrFail($groupId);
+        
+        if (!$group->users()->where('user_id', auth()->id())->exists()) {
+            return [];
+        }
+
+        $searchTerm = '%' . $query . '%';
+        
+        $members = $group->users()
+            ->where(function ($q) use ($searchTerm) {
+                $q->where('first_name', 'like', $searchTerm)
+                  ->orWhere('last_name', 'like', $searchTerm)
+                  ->orWhere('username', 'like', $searchTerm)
+                  ->orWhere('email', 'like', $searchTerm);
+            })
+            ->limit(10)
+            ->get();
+
+        return $members->map(function ($user) {
+            return [
+                'id' => $user->id,
+                'username' => $user->username,
+                'first_name' => $user->first_name,
+                'last_name' => $user->last_name,
+                'email' => $user->email,
+                'avatar_url' => $user->avatar_url,
+                'full_name' => $this->getFullName($user),
+                'initials' => $this->getInitials($user),
+                'display_name' => $this->getDisplayName($user),
+                'role' => $user->pivot->role ?? 'member'
+            ];
+        })->toArray();
+    }
+
     private function getFullName(User $user): string
     {
         if ($user->first_name && $user->last_name) {
