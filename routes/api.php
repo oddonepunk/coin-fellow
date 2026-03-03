@@ -129,6 +129,7 @@ Route::middleware('jwt.auth')->prefix('notifications')->group(function () {
 
 //budgets routes
 Route::middleware('jwt.auth')->prefix('groups/{groupId}')->group(function () {
+     Route::get('members/search', [UserController::class, 'searchGroupMembers']); //поиск челов в группе
     Route::get('budgets', [BudgetController::class, 'getGroupBudgets']);
     Route::post('budgets', [BudgetController::class, 'createBudget']);
     Route::get('budgets/overview', [BudgetController::class, 'getGroupBudgetOverview']);
