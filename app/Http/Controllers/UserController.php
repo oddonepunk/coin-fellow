@@ -7,6 +7,9 @@ use App\Http\Resources\UserSearchResource;
 use App\Services\Users\DTO\SearchUsersDTO;
 use App\Services\Users\Interfaces\UserServiceInterface;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use App\Models\Group;
+
 
 class UserController extends Controller
 {

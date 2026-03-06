@@ -8,6 +8,7 @@ use App\Services\Users\DTO\SearchUsersDTO;
 use App\Services\Users\Interfaces\UserServiceInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use App\Models\Group;
 
 class UserService implements UserServiceInterface
 {
