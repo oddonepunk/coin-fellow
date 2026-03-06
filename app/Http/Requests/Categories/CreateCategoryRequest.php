@@ -15,8 +15,8 @@ class CreateCategoryRequest extends BaseRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'icon' => 'nullable|string|max:50',
-            'color' => 'nullable|string|max:7'
+            'icon' => 'nullable|string|max:10',
+            'color' => 'nullable|string|max:7',
         ];
     }
 }
