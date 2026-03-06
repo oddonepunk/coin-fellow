@@ -15,10 +15,6 @@ class CategoryResource extends JsonResource
             'icon' => $this->icon,
             'color' => $this->color,
             'is_default' => $this->is_default,
-            'user_id' => $this->user_id,
-            'is_editable' => $this->when($this->is_default !== null, $this->isEditable()),
-            'is_deletable' => $this->when($this->is_default !== null, $this->isDeletable()),
-            'expenses_count' => $this->whenCounted('expenses', $this->expenses_count),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
