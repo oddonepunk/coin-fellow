@@ -15,6 +15,7 @@ class CreateExpenseRequest extends BaseRequest
             'description' => 'required|string|max:255',
             'amount' => 'required|numeric|min:0.01',
             'date' => 'required|date',
+            'payer_id' => 'nullable|exists:users,id', 
             'categoryId' => 'nullable|exists:categories,id',
             'participants' => 'nullable|array',
             'participants.*' => 'exists:users,id',

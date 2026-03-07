@@ -38,33 +38,41 @@ class ExpenseService implements ExpenseServiceInterface {
     }
 
     public function createExpense(User $user, CreateExpenseDTO $dto): Expense {
-        $group = Group::with('users')->findOrFail($dto->groupId);
+    $group = Group::with('users')->findOrFail($dto->groupId);
 
-        if(!$group->users->contains($user->id)) {
+    if(!$group->users->contains($user->id)) {
+        throw ValidationException::withMessages([
+            'group' => ['Вы не являетесь участником этой группы'],
+        ]);
+    }
+
+    return DB::transaction(function() use ($user, $dto, $group) {
+        $payerId = $dto->payerId ?? $user->id;
+        
+        if (!$group->users->contains('id', $payerId)) {
             throw ValidationException::withMessages([
-                'group' => ['Вы не являетесь участником этой группы'],
+                'payer_id' => ['Плательщик не является участником группы'],
             ]);
         }
 
-        return DB::transaction(function() use ($user, $dto, $group) {
-            $expense = Expense::create([
-                'group_id' => $dto->groupId,
-                'payer_id' => $user->id,
-                'category_id' => $dto->categoryId,
-                'description' => $dto->description,
-                'amount' => $dto->amount,
-                'date' => $dto->date,
-            ]);
+        $expense = Expense::create([
+            'group_id' => $dto->groupId,
+            'payer_id' => $payerId,
+            'category_id' => $dto->categoryId,
+            'description' => $dto->description,
+            'amount' => $dto->amount,
+            'date' => $dto->date,
+        ]);
 
-            $this->handleParticipants($expense, $dto->participants, $group);
-            
-            $this->balanceService->calculateBalancesForGroup($dto->groupId);
+        $this->handleParticipants($expense, $dto->participants, $group);
+        
+        $this->balanceService->calculateBalancesForGroup($dto->groupId);
 
-            $this->notifyExpenseCreated($expense, $user, $group);
+        $this->notifyExpenseCreated($expense, $user, $group);
 
-            return $expense->load(['payer', 'category' , 'participants']);
-        });  
-    }
+        return $expense->load(['payer', 'category' , 'participants']);
+    });  
+}
     
     private function handleParticipants(Expense $expense, ?array $participants, Group $group): void
     {
