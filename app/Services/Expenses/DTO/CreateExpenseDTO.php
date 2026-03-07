@@ -10,6 +10,7 @@ class CreateExpenseDTO extends Data {
         public float $amount,
         public string $date,
         public string $groupId,
+        public ?string $payerId = null, 
         public ?string $categoryId = null,
         public ?array $participants = null
     ) {}

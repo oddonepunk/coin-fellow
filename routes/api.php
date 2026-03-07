@@ -79,16 +79,12 @@ Route::middleware('jwt.auth')->prefix('groups/{groupId}')->group(function () {
 
 Route::middleware('jwt.auth')->prefix('categories')->group(function () {
     Route::get('/', [CategoryController::class, 'index']);
-    Route::get('/all', [CategoryController::class, 'listAll']);
+    Route::get('/defaults', [CategoryController::class, 'defaults']);
+    Route::get('/user', [CategoryController::class, 'user']);
     Route::post('/', [CategoryController::class, 'store']);
-    Route::get('/user-statistics', [CategoryController::class, 'userStatistics']);
-    
-    Route::prefix('{categoryId}')->group(function () {
-        Route::get('/', [CategoryController::class, 'show']);
-        Route::put('/', [CategoryController::class, 'update']);
-        Route::delete('/', [CategoryController::class, 'destroy']);
-        Route::get('/statistics', [CategoryController::class, 'statistics']);
-    });
+    Route::get('/{id}', [CategoryController::class, 'show']);
+    Route::put('/{id}', [CategoryController::class, 'update']);
+    Route::delete('/{id}', [CategoryController::class, 'destroy']);
 });
 
 

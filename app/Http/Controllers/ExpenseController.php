@@ -37,6 +37,7 @@ class ExpenseController extends Controller
         $user = $request->user();
         $validated = $request->validated();
         $validated['groupId'] = $groupId;
+        $validated['payerId'] = $validated['payer_id'] ?? $user->id;
         
         $dto = CreateExpenseDTO::from($validated);
         $expense = $this->expenseService->createExpense($user, $dto);
