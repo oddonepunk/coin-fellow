@@ -158,9 +158,10 @@ public function getInitialsAttribute(): string
         return $query->where('telegram_user_id', $telegramId);
     }
 
-    public function groups(): BelongsToMany {
+    public function groups(): BelongsToMany 
+    {
         return $this->belongsToMany(Group::class, 'group_user')
-            ->withPivot('role')
+            ->withPivot(['role_id', 'role', 'created_at', 'updated_at'])
             ->withTimestamps();
     }
 

@@ -7,7 +7,10 @@ use App\Models\User;
 use App\Services\Groups\DTO\CreateGroupDTO;
 use App\Services\Groups\DTO\UpdateGroupDTO;
 use App\Services\Groups\DTO\InviteUserDTO;
+use App\Services\Groups\DTO\GroupStatsDTO;
+use App\Services\Groups\DTO\MemberStatsDTO;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 interface GroupServiceInterface 
 {
