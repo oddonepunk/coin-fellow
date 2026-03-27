@@ -4,18 +4,20 @@ namespace App\Services\Groups;
 
 use App\Models\Group;
 use App\Models\User;
-use App\Models\Invitation;
-use App\Models\GroupUser; 
-use App\Models\GroupRole; 
+use App\Models\GroupUser;
+use App\Models\GroupRole;
 use App\Services\Notifications\Interfaces\NotificationServiceInterface;
 use App\Services\Groups\DTO\CreateGroupDTO;
 use App\Services\Groups\DTO\UpdateGroupDTO;
 use App\Services\Groups\DTO\InviteUserDTO;
+use App\Services\Groups\DTO\GroupStatsDTO;
+use App\Services\Groups\DTO\MemberStatsDTO;
 use App\Services\Groups\Interfaces\GroupServiceInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Log;
 
 class GroupService implements GroupServiceInterface 
 {
