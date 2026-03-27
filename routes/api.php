@@ -131,6 +131,9 @@ Route::middleware('jwt.auth')->prefix('groups/{groupId}')->group(function () {
     Route::get('budgets/overview', [BudgetController::class, 'getGroupBudgetOverview']);
     Route::get('budgets/recommendations', [BudgetController::class, 'getBudgetRecommendations']);
     
+    Route::get('stats', [GroupController::class, 'stats']);
+    Route::get('members/{userId}/stats', [GroupController::class, 'memberStats']);
+
     Route::prefix('budgets/{budgetId}')->group(function () {
         Route::get('/', [BudgetController::class, 'getBudget']);
         Route::put('/', [BudgetController::class, 'updateBudget']);

@@ -246,4 +246,70 @@ class GroupService implements GroupServiceInterface
                 ->update(['role' => 'owner']);
         });
     }
+
+
+        public function getGroupStats(GroupStatsDTO $dto): array
+    {
+        $group = Group::with(['expenses', 'expenses.category', 'users'])->findOrFail($dto->groupId);
+        
+        // Проверяем, что пользователь является участником
+        if (!$group->users()->where('user_id', auth()->id())->exists()) {
+            throw ValidationException::withMessages([
+                'group' => ['Вы не являетесь участником этой группы'],
+            ]);
+        }
+
+        $totalExpenses = $group->expenses()->sum('amount');
+        $memberCount = $group->users()->count();
+        
+        // Расходы текущего пользователя
+        $userExpenses = $group->expenses()
+            ->where('payer_id', auth()->id())
+            ->sum('amount');
+        
+        // Средний расход на участника
+        $avgExpensePerMember = $memberCount > 0 ? $totalExpenses / $memberCount : 0;
+        
+        // Топ категорий
+        $topCategories = $group->expenses()
+            ->with('category')
+            ->select('category_id', DB::raw('SUM(amount) as total'))
+            ->whereNotNull('category_id')
+            ->groupBy('category_id')
+            ->orderBy('total', 'desc')
+            ->limit(5)
+            ->get();
+        
+        // Расходы по месяцам (последние 6 месяцев)
+        $monthlyExpenses = $group->expenses()
+            ->select(DB::raw('DATE_FORMAT(date, "%Y-%m") as month'), DB::raw('SUM(amount) as total'))
+            ->groupBy('month')
+            ->orderBy('month', 'desc')
+            ->limit(6)
+            ->get();
+        
+        return [
+            'total_expenses' => (float) $totalExpenses,
+            'member_count' => $memberCount,
+            'user_expenses' => (float) $userExpenses,
+            'avg_expense_per_member' => (float) $avgExpensePerMember,
+            'top_categories' => $topCategories->map(function ($item) use ($totalExpenses) {
+                $category = $item->category;
+                return [
+                    'category_id' => $item->category_id,
+                    'category_name' => $category?->name ?? 'Без категории',
+                    'category_icon' => $category?->icon ?? '📦',
+                    'category_color' => $category?->color ?? '#6B7280',
+                    'total' => (float) $item->total,
+                    'percentage' => $totalExpenses > 0 ? round(($item->total / $totalExpenses) * 100, 1) : 0
+                ];
+            }),
+            'monthly_expenses' => $monthlyExpenses->map(function ($item) {
+                return [
+                    'month' => $item->month,
+                    'total' => (float) $item->total
+                ];
+            })->values()
+        ];
+    }
 }
