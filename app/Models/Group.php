@@ -19,8 +19,11 @@ class Group extends Model
         'invite_code',
     ];
 
-    public function users(): BelongsToMany {
-        return $this->members();
+    public function users(): BelongsToMany 
+    {
+        return $this->belongsToMany(User::class, 'group_user')
+            ->withPivot(['role_id', 'role', 'created_at', 'updated_at'])
+            ->withTimestamps();
     }
 
     public function expenses(): HasMany {
@@ -81,7 +84,13 @@ class Group extends Model
             $query->where('user_id', $user->id);
         }]);
     }
+    
 
+    public function getAmountPerParticipant(): float 
+    {
+        $participantsCount = $this->participants()->count();
+        return $participantsCount > 0 ? $this->amount / $participantsCount : 0;
+    }
    
 
  

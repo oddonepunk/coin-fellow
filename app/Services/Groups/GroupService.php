@@ -31,6 +31,7 @@ class GroupService implements GroupServiceInterface
             ->orderBy('created_at', 'desc')
             ->paginate(15);
     }
+
     
     public function createGroup(User $user, CreateGroupDTO $dto): Group 
     {
@@ -248,11 +249,10 @@ class GroupService implements GroupServiceInterface
     }
 
 
-        public function getGroupStats(GroupStatsDTO $dto): array
+    public function getGroupStats(GroupStatsDTO $dto): array
     {
         $group = Group::with(['expenses', 'expenses.category', 'users'])->findOrFail($dto->groupId);
         
-        // Проверяем, что пользователь является участником
         if (!$group->users()->where('user_id', auth()->id())->exists()) {
             throw ValidationException::withMessages([
                 'group' => ['Вы не являетесь участником этой группы'],
@@ -262,15 +262,12 @@ class GroupService implements GroupServiceInterface
         $totalExpenses = $group->expenses()->sum('amount');
         $memberCount = $group->users()->count();
         
-        // Расходы текущего пользователя
         $userExpenses = $group->expenses()
             ->where('payer_id', auth()->id())
             ->sum('amount');
         
-        // Средний расход на участника
         $avgExpensePerMember = $memberCount > 0 ? $totalExpenses / $memberCount : 0;
         
-        // Топ категорий
         $topCategories = $group->expenses()
             ->with('category')
             ->select('category_id', DB::raw('SUM(amount) as total'))
@@ -280,7 +277,6 @@ class GroupService implements GroupServiceInterface
             ->limit(5)
             ->get();
         
-        // Расходы по месяцам (последние 6 месяцев)
         $monthlyExpenses = $group->expenses()
             ->select(DB::raw('DATE_FORMAT(date, "%Y-%m") as month'), DB::raw('SUM(amount) as total'))
             ->groupBy('month')
@@ -310,6 +306,57 @@ class GroupService implements GroupServiceInterface
                     'total' => (float) $item->total
                 ];
             })->values()
+        ];
+    }
+
+    public function getMemberStats(MemberStatsDTO $dto): array
+    {
+        $group = Group::with(['expenses', 'expenses.participants'])->findOrFail($dto->groupId);
+        $member = User::findOrFail($dto->userId);
+        
+        //проверка, что пользователь является участником
+        if (!$group->users()->where('user_id', auth()->id())->exists()) {
+            throw ValidationException::withMessages([
+                'group' => ['Вы не являетесь участником этой группы'],
+            ]);
+        }
+        
+        //проверка, что запрашиваемый участник состоит в группе
+        if (!$group->users()->where('user_id', $dto->userId)->exists()) {
+            throw ValidationException::withMessages([
+                'user' => ['Пользователь не является участником этой группы'],
+            ]);
+        }
+        
+        //сумма, которую юзер заплатил
+        $totalPaid = $group->expenses()
+            ->where('payer_id', $dto->userId)
+            ->sum('amount');
+        
+        //сумма, которую юзер должен другим
+        $totalOwed = 0;
+        $participatedExpenses = $group->expenses()
+            ->whereHas('participants', function ($q) use ($dto) {
+                $q->where('user_id', $dto->userId);
+            })
+            ->get();
+        
+        foreach ($participatedExpenses as $expense) {
+            $participantShare = $expense->getAmountPerParticipant();
+            if ($expense->payer_id !== $dto->userId) {
+                $totalOwed += $participantShare;
+            }
+        }
+        
+        $balance = $totalPaid - $totalOwed;
+        
+        return [
+            'user_id' => $dto->userId,
+            'full_name' => $member->full_name ?? $member->username ?? $member->email,
+            'total_paid' => (float) $totalPaid,
+            'total_owed' => (float) $totalOwed,
+            'balance' => (float) $balance,
+            'balance_status' => $balance > 0 ? 'positive' : ($balance < 0 ? 'negative' : 'zero')
         ];
     }
 }

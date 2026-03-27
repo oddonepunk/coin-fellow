@@ -102,4 +102,37 @@ class GroupController extends Controller
             'message' => 'Вы покинули группу',
         ]);
     }
+
+
+    public function stats(Request $request, string $groupId): JsonResponse
+    {
+        $dto = GroupStatsDTO::from([
+            'groupId' => $groupId
+        ]);
+        
+        $stats = $this->groupService->getGroupStats($dto);
+        
+        return response()->json([
+            'success' => true,
+            'data' => $stats,
+            'message' => 'Group statistics retrieved successfully'
+        ]);
+    }
+
+  
+    public function memberStats(Request $request, string $groupId, string $userId): JsonResponse
+    {
+        $dto = MemberStatsDTO::from([
+            'groupId' => $groupId,
+            'userId' => $userId
+        ]);
+        
+        $stats = $this->groupService->getMemberStats($dto);
+        
+        return response()->json([
+            'success' => true,
+            'data' => $stats,
+            'message' => 'Member statistics retrieved successfully'
+        ]);
+    }
 }
