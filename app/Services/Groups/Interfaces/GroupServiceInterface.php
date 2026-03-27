@@ -19,4 +19,7 @@ interface GroupServiceInterface
     public function inviteUser(User $user, string $groupId, InviteUserDTO $dto): void; 
     public function removeUser(User $user, string $groupId, string $userId): void;
     public function leaveGroup(User $user, string $groupId): void;
+
+    public function getGroupStats(GroupStatsDTO $dto): array;
+    public function getMemberStats(MemberStatsDTO $dto): array;
 }
