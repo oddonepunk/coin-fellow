@@ -2,13 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Cache;
 use App\Http\Requests\Analytics\AnalyticsRequest;
-use App\Http\Resources\ChartDataResource;
 use App\Services\Analytics\DTO\AnalyticsFilterDTO;
 use App\Services\Analytics\Interfaces\AnalyticsServiceInterface;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use App\Models\User; 
 use App\Models\Group;
 
@@ -23,12 +20,18 @@ class AnalyticsController extends Controller
         $user = $request->user();
         $this->checkGroupAccess($user, $groupId);
         
-        $dto = AnalyticsFilterDTO::from($request->validated());
+        $validated = $request->validated();
+        $period = $validated['period'] ?? 'month';
+        
+        $dto = AnalyticsFilterDTO::from([
+            'period' => $period
+        ]);
+        
         $chartData = $this->analyticsService->getGroupSpendingTrend($groupId, $dto);
-
+    
         return response()->json([
             'success' => true,
-            'data' => new ChartDataResource($chartData),
+            'data' => $chartData,
             'message' => 'Тенденции расходов успешно получены'
         ]);
     }
@@ -38,12 +41,18 @@ class AnalyticsController extends Controller
         $user = $request->user();
         $this->checkGroupAccess($user, $groupId);
         
-        $dto = AnalyticsFilterDTO::from($request->validated());
+        $validated = $request->validated();
+        $period = $validated['period'] ?? 'month';
+        
+        $dto = AnalyticsFilterDTO::from([
+            'period' => $period
+        ]);
+        
         $chartData = $this->analyticsService->getCategoryBreakdown($groupId, $dto);
 
         return response()->json([
             'success' => true,
-            'data' => new ChartDataResource($chartData),
+            'data' => $chartData,
             'message' => 'Разбивка по категориям успешно получена'
         ]);
     }
@@ -53,12 +62,18 @@ class AnalyticsController extends Controller
         $user = $request->user();
         $this->checkGroupAccess($user, $groupId);
         
-        $dto = AnalyticsFilterDTO::from($request->validated());
+        $validated = $request->validated();
+        $period = $validated['period'] ?? 'month';
+        
+        $dto = AnalyticsFilterDTO::from([
+            'period' => $period
+        ]);
+        
         $chartData = $this->analyticsService->getUserSpendingComparison($groupId, $dto);
 
         return response()->json([
             'success' => true,
-            'data' => new ChartDataResource($chartData),
+            'data' => $chartData,
             'message' => 'Сравнение расходов пользователей успешно получено'
         ]);
     }
@@ -68,12 +83,18 @@ class AnalyticsController extends Controller
         $user = $request->user();
         $this->checkGroupAccess($user, $groupId);
         
-        $dto = AnalyticsFilterDTO::from($request->validated());
+        $validated = $request->validated();
+        $period = $validated['period'] ?? 'month';
+        
+        $dto = AnalyticsFilterDTO::from([
+            'period' => $period
+        ]);
+        
         $chartData = $this->analyticsService->getExpenseDistribution($groupId, $dto);
 
         return response()->json([
             'success' => true,
-            'data' => new ChartDataResource($chartData),
+            'data' => $chartData,
             'message' => 'Распределение расходов успешно получено'
         ]);
     }
@@ -83,7 +104,13 @@ class AnalyticsController extends Controller
         $user = $request->user();
         $this->checkGroupAccess($user, $groupId);
         
-        $dto = AnalyticsFilterDTO::from($request->validated());
+        $validated = $request->validated();
+        $period = $validated['period'] ?? 'month';
+        
+        $dto = AnalyticsFilterDTO::from([
+            'period' => $period
+        ]);
+        
         $categories = $this->analyticsService->getTopSpendingCategories($groupId, $dto);
 
         return response()->json([
@@ -98,7 +125,13 @@ class AnalyticsController extends Controller
         $user = $request->user();
         $this->checkGroupAccess($user, $groupId);
         
-        $dto = AnalyticsFilterDTO::from($request->validated());
+        $validated = $request->validated();
+        $period = $validated['period'] ?? 'month';
+        
+        $dto = AnalyticsFilterDTO::from([
+            'period' => $period
+        ]);
+        
         $stats = $this->analyticsService->getUserSpendingStats($groupId, $dto);
 
         return response()->json([
@@ -113,7 +146,13 @@ class AnalyticsController extends Controller
         $user = $request->user();
         $this->checkGroupAccess($user, $groupId);
         
-        $dto = AnalyticsFilterDTO::from($request->validated());
+        $validated = $request->validated();
+        $period = $validated['period'] ?? 'month';
+        
+        $dto = AnalyticsFilterDTO::from([
+            'period' => $period
+        ]);
+        
         $comparison = $this->analyticsService->getPeriodComparison($groupId, $dto);
 
         return response()->json([
@@ -128,7 +167,13 @@ class AnalyticsController extends Controller
         $user = $request->user();
         $this->checkGroupAccess($user, $groupId);
         
-        $dto = AnalyticsFilterDTO::from($request->validated());
+        $validated = $request->validated();
+        $period = $validated['period'] ?? 'month';
+        
+        $dto = AnalyticsFilterDTO::from([
+            'period' => $period
+        ]);
+        
         $opportunities = $this->analyticsService->getSavingsOpportunities($groupId, $dto);
 
         return response()->json([
@@ -143,7 +188,13 @@ class AnalyticsController extends Controller
         $user = $request->user();
         $this->checkGroupAccess($user, $groupId);
         
-        $dto = AnalyticsFilterDTO::from($request->validated());
+        $validated = $request->validated();
+        $period = $validated['period'] ?? 'month';
+        
+        $dto = AnalyticsFilterDTO::from([
+            'period' => $period
+        ]);
+        
         $predictions = $this->analyticsService->getSpendingPredictions($groupId, $dto);
 
         return response()->json([
@@ -158,7 +209,13 @@ class AnalyticsController extends Controller
         $user = $request->user();
         $this->checkGroupAccess($user, $groupId);
         
-        $dto = AnalyticsFilterDTO::from($request->validated());
+        $validated = $request->validated();
+        $period = $validated['period'] ?? 'month';
+        
+        $dto = AnalyticsFilterDTO::from([
+            'period' => $period
+        ]);
+        
         $dashboard = $this->analyticsService->getGroupAnalyticsDashboard($groupId, $dto);
 
         return response()->json([
@@ -171,7 +228,14 @@ class AnalyticsController extends Controller
     public function getUserAnalyticsDashboard(AnalyticsRequest $request): JsonResponse
     {
         $user = $request->user();
-        $dto = AnalyticsFilterDTO::from($request->validated());
+        
+        $validated = $request->validated();
+        $period = $validated['period'] ?? 'month';
+        
+        $dto = AnalyticsFilterDTO::from([
+            'period' => $period
+        ]);
+        
         $dashboard = $this->analyticsService->getUserAnalyticsDashboard($user, $dto);
 
         return response()->json([
@@ -186,7 +250,13 @@ class AnalyticsController extends Controller
         $user = $request->user();
         $this->checkGroupAccess($user, $groupId);
         
-        $dto = AnalyticsFilterDTO::from($request->validated());
+        $validated = $request->validated();
+        $period = $validated['period'] ?? 'month';
+        
+        $dto = AnalyticsFilterDTO::from([
+            'period' => $period
+        ]);
+        
         $report = $this->analyticsService->generateAnalyticsReport($groupId, $dto);
 
         return response()->json([
@@ -201,7 +271,7 @@ class AnalyticsController extends Controller
 
     private function checkGroupAccess(User $user, string $groupId): void
     {
-        $group = \App\Models\Group::findOrFail($groupId);
+        $group = Group::findOrFail($groupId);
         
         if (!$group->users->contains($user->id)) {
             abort(403, 'Вы не являетесь участником этой группы');
