@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Cache;
 use App\Http\Requests\Analytics\AnalyticsRequest;
 use App\Http\Resources\ChartDataResource;
 use App\Services\Analytics\DTO\AnalyticsFilterDTO;
 use App\Services\Analytics\Interfaces\AnalyticsServiceInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Models\User; 
+use App\Models\Group;
 
 class AnalyticsController extends Controller
 {
