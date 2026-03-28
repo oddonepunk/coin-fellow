@@ -9,10 +9,13 @@ class ChartDataResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        if (is_array($this->resource)) {
+            return $this->resource;
+        }
+        
         return [
-            'labels' => $this->labels,
-            'datasets' => $this->datasets,
-            'metadata' => $this->metadata
+            'labels' => $this->resource['labels'] ?? [],
+            'datasets' => $this->resource['datasets'] ?? [],
         ];
     }
 }

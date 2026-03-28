@@ -15,7 +15,7 @@ use Carbon\Carbon;
 class AnalyticsService implements AnalyticsServiceInterface
 {
     private const CACHE_PREFIX = 'analytics_';
-    private const CACHE_TTL = 3600; // 1 час
+    private const CACHE_TTL = 3600;
 
     public function getGroupAnalyticsDashboard(string $groupId, AnalyticsFilterDTO $dto): array
     {
@@ -24,8 +24,6 @@ class AnalyticsService implements AnalyticsServiceInterface
         if (Cache::has($cacheKey)) {
             return Cache::get($cacheKey);
         }
-        
-        $group = Group::findOrFail($groupId);
         
         $query = Expense::where('group_id', $groupId);
         
@@ -73,9 +71,10 @@ class AnalyticsService implements AnalyticsServiceInterface
         
         $totalExpenses = $categories->sum('total');
         
-        $data = $categories->map(function ($item) use ($totalExpenses) {
+        $result = [];
+        foreach ($categories as $item) {
             $category = $item->category;
-            return [
+            $result[] = [
                 'category_id' => $item->category_id,
                 'category_name' => $category?->name ?? 'Без категории',
                 'icon' => $category?->icon ?? '📦',
@@ -83,11 +82,11 @@ class AnalyticsService implements AnalyticsServiceInterface
                 'total' => (float) $item->total,
                 'percentage' => $totalExpenses > 0 ? round(($item->total / $totalExpenses) * 100, 1) : 0
             ];
-        });
+        }
         
-        Cache::put($cacheKey, $data, self::CACHE_TTL);
+        Cache::put($cacheKey, $result, self::CACHE_TTL);
         
-        return $data->toArray();
+        return $result;
     }
 
     public function getUserSpendingComparison(string $groupId, AnalyticsFilterDTO $dto): array
@@ -112,9 +111,10 @@ class AnalyticsService implements AnalyticsServiceInterface
         
         $totalExpenses = $users->sum('total');
         
-        $data = $users->map(function ($item) use ($totalExpenses) {
+        $result = [];
+        foreach ($users as $item) {
             $user = $item->payer;
-            return [
+            $result[] = [
                 'user_id' => $item->payer_id,
                 'user_name' => $user?->full_name ?? $user?->username ?? 'Неизвестно',
                 'first_name' => $user?->first_name,
@@ -124,11 +124,11 @@ class AnalyticsService implements AnalyticsServiceInterface
                 'total' => (float) $item->total,
                 'percentage' => $totalExpenses > 0 ? round(($item->total / $totalExpenses) * 100, 1) : 0
             ];
-        });
+        }
         
-        Cache::put($cacheKey, $data, self::CACHE_TTL);
+        Cache::put($cacheKey, $result, self::CACHE_TTL);
         
-        return $data->toArray();
+        return $result;
     }
 
     public function getPeriodComparison(string $groupId, AnalyticsFilterDTO $dto): array
@@ -225,21 +225,21 @@ class AnalyticsService implements AnalyticsServiceInterface
             ->orderBy('date', 'asc')
             ->get();
         
-        $data = $trend->map(function ($item) {
-            return [
+        $result = [];
+        foreach ($trend as $item) {
+            $result[] = [
                 'date' => $item->date,
                 'total' => (float) $item->total
             ];
-        });
+        }
         
-        Cache::put($cacheKey, $data, self::CACHE_TTL);
+        Cache::put($cacheKey, $result, self::CACHE_TTL);
         
-        return $data->toArray();
+        return $result;
     }
 
     public function getExpenseDistribution(string $groupId, AnalyticsFilterDTO $dto): array
     {
-        // Аналогично с кешированием
         $cacheKey = self::CACHE_PREFIX . 'distribution_' . $groupId . '_' . $dto->period;
         
         if (Cache::has($cacheKey)) {
@@ -252,7 +252,7 @@ class AnalyticsService implements AnalyticsServiceInterface
             $query->where('date', '>=', $this->getStartDate($dto->period));
         }
         
-        $data = [
+        $result = [
             'by_amount' => [
                 'under_1000' => $query->clone()->where('amount', '<', 1000)->count(),
                 '1000_5000' => $query->clone()->whereBetween('amount', [1000, 5000])->count(),
@@ -261,9 +261,9 @@ class AnalyticsService implements AnalyticsServiceInterface
             ]
         ];
         
-        Cache::put($cacheKey, $data, self::CACHE_TTL);
+        Cache::put($cacheKey, $result, self::CACHE_TTL);
         
-        return $data;
+        return $result;
     }
 
     public function getTopSpendingCategories(string $groupId, AnalyticsFilterDTO $dto): array
@@ -288,19 +288,20 @@ class AnalyticsService implements AnalyticsServiceInterface
             ->limit(5)
             ->get();
         
-        $data = $categories->map(function ($item) {
+        $result = [];
+        foreach ($categories as $item) {
             $category = $item->category;
-            return [
+            $result[] = [
                 'category_id' => $item->category_id,
                 'name' => $category?->name ?? 'Без категории',
                 'icon' => $category?->icon ?? '📦',
                 'total' => (float) $item->total
             ];
-        });
+        }
         
-        Cache::put($cacheKey, $data, self::CACHE_TTL);
+        Cache::put($cacheKey, $result, self::CACHE_TTL);
         
-        return $data->toArray();
+        return $result;
     }
 
     public function getUserSpendingStats(string $groupId, AnalyticsFilterDTO $dto): array
