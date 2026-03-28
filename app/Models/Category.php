@@ -11,11 +11,13 @@ class Category extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'name',
-        'icon',
-        'color',
-    ];
+  protected $fillable = [
+    'name',
+    'icon',
+    'color',
+    'is_default',
+    'user_id'
+  ];
     
     public function expenses(): HasMany {
         return $this->hasMany(Expense::class);

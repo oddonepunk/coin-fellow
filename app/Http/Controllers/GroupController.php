@@ -11,6 +11,8 @@ use App\Services\Groups\Interfaces\GroupServiceInterface;
 use App\Services\Groups\DTO\CreateGroupDTO;
 use App\Services\Groups\DTO\UpdateGroupDTO;
 use App\Services\Groups\DTO\InviteUserDTO;
+use App\Services\Groups\DTO\GroupStatsDTO;
+use App\Services\Groups\DTO\MemberStatsDTO;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 

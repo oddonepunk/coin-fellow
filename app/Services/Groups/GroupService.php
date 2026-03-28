@@ -251,25 +251,30 @@ class GroupService implements GroupServiceInterface
     }
 
 
-    public function getGroupStats(GroupStatsDTO $dto): array
-    {
-        $group = Group::with(['expenses', 'expenses.category', 'users'])->findOrFail($dto->groupId);
+   public function getGroupStats(GroupStatsDTO $dto): array
+{
+    try {
+        \Log::info('=== getGroupStats START ===');
+        \Log::info('Group ID: ' . $dto->groupId);
         
+        $group = Group::with(['expenses', 'expenses.category', 'users'])->findOrFail($dto->groupId);
+        \Log::info('Group found: ' . $group->name);
+        
+        // Проверяем, что пользователь является участником
         if (!$group->users()->where('user_id', auth()->id())->exists()) {
+            \Log::error('User is not a member of group: ' . $dto->groupId);
             throw ValidationException::withMessages([
                 'group' => ['Вы не являетесь участником этой группы'],
             ]);
         }
-
+        
         $totalExpenses = $group->expenses()->sum('amount');
         $memberCount = $group->users()->count();
-        
-        $userExpenses = $group->expenses()
-            ->where('payer_id', auth()->id())
-            ->sum('amount');
-        
+        $userExpenses = $group->expenses()->where('payer_id', auth()->id())->sum('amount');
         $avgExpensePerMember = $memberCount > 0 ? $totalExpenses / $memberCount : 0;
         
+        
+        // Топ категорий
         $topCategories = $group->expenses()
             ->with('category')
             ->select('category_id', DB::raw('SUM(amount) as total'))
@@ -279,14 +284,19 @@ class GroupService implements GroupServiceInterface
             ->limit(5)
             ->get();
         
-        $monthlyExpenses = $group->expenses()
-            ->select(DB::raw('DATE_FORMAT(date, "%Y-%m") as month'), DB::raw('SUM(amount) as total'))
-            ->groupBy('month')
-            ->orderBy('month', 'desc')
-            ->limit(6)
-            ->get();
+        \Log::info('Top categories count: ' . $topCategories->count());
         
-        return [
+        // Расходы по месяцам
+       $monthlyExpenses = $group->expenses()
+        ->select(DB::raw("TO_CHAR(date, 'YYYY-MM') as month"), DB::raw('SUM(amount) as total'))
+        ->groupBy('month')
+        ->orderBy('month', 'desc')
+        ->limit(6)
+        ->get();
+        
+        \Log::info('Monthly expenses count: ' . $monthlyExpenses->count());
+        
+        $result = [
             'total_expenses' => (float) $totalExpenses,
             'member_count' => $memberCount,
             'user_expenses' => (float) $userExpenses,
@@ -309,7 +319,18 @@ class GroupService implements GroupServiceInterface
                 ];
             })->values()
         ];
+        
+        \Log::info('=== getGroupStats SUCCESS ===');
+        return $result;
+        
+    } catch (\Exception $e) {
+        \Log::error('ERROR in getGroupStats: ' . $e->getMessage());
+        \Log::error('File: ' . $e->getFile());
+        \Log::error('Line: ' . $e->getLine());
+        \Log::error('Trace: ' . $e->getTraceAsString());
+        throw $e;
     }
+}
 
     public function getMemberStats(MemberStatsDTO $dto): array
     {
